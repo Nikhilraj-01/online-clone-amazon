@@ -1,0 +1,37 @@
+name: Deploy HTML CSS Website
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare website directory
+        run: |
+          sudo mkdir -p /var/www/doapp
+          sudo chown -R $USER:$USER /var/www/doapp
+      - name: Deploy website
+        run: |
+          rm -rf /var/www/doapp/*
+          cp -r ./* /var/www/doapp/
+      - name: Set permissions
+        run: |
+          sudo find /var/www/doapp -type d -exec chmod 755 {} \;
+          sudo find /var/www/doapp -type f -exec chmod 644 {} \;
+      - name: Test Nginx
+        run: |
+          sudo nginx -t
+      - name: Reload Nginx
+        run: |
+          sudo systemctl reload nginx
+      - name: Deployment successful
+        run: |
+          echo "Website deployed successfully!"
+          ls -la /var/www/doapp
